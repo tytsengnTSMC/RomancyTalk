@@ -9,15 +9,20 @@ function makeUsername() {
 }
 
 var uname = makeUsername();
+var chat;
 
 var socket = io.connect('http://localhost:3000', {query: "username="+uname});
 
 socket.on('logedin', function(Uname) {
-    if (Uname===uname) {
+    var name = Uname["name"];
+    console.log(Uname);
+    chat = Uname["chat"];
+
+    if (name===uname) {
         $('#chatbox').append($('<div class="message-logedin">You joined the chat.</div>'));
         $("body").scrollTop( $("body")[0].scrollHeight );
     } else {
-        $('#chatbox').append($('<div class="message-logedin">'+Uname.toString()+' joined the chat.</div>'));
+        $('#chatbox').append($('<div class="message-logedin">'+name+' joined the chat.</div>'));
         $("body").scrollTop( $("body")[0].scrollHeight );
     }
 });
@@ -125,8 +130,14 @@ function unreadTitle(param) {
 $('html').click(function() {unreadTitle('reset');});
 
 socket.on('chat message', function(msg){
-    var msg_txt = msg.msgText.toString();
+    var msg_chat = msg["chat"];
+    var msg_txt = msg["msg"].msgText.toString();
     msg_txt = urlify(msg_txt);
+    console.log(chat);
+    if(msg_chat != chat){
+        return;
+    }
+
     if (msg.userName===uname) {
         $('#chatbox').append($('<div class="message-container-me"><p class="message-me col-md-9 col-xs-12 col-lg-5 col-sm-10">'+msg_txt+'</p></div>'));
         $("body").scrollTop( $("body")[0].scrollHeight );
